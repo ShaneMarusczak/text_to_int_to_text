@@ -22,7 +22,7 @@ fn get_power(num: usize) -> u32 {
 }
 
 fn text_to_int(text_num: &str) -> isize {
-    let mut num_words: HashMap<String, (isize, isize)> = HashMap::new();
+    let mut num_words: HashMap<&str, (isize, isize)> = HashMap::new();
 
     let units = [
         "zero",
@@ -53,9 +53,10 @@ fn text_to_int(text_num: &str) -> isize {
 
     let scales = ["hundred", "thousand", "million", "billion", "trillion"];
 
-    num_words.insert(String::from("and"), (1, 0));
+    num_words.insert("and", (1, 0));
 
     let all_words = [
+        "and",
         "zero",
         "one",
         "two",
@@ -92,17 +93,17 @@ fn text_to_int(text_num: &str) -> isize {
     ];
 
     for (index, word) in units.iter().enumerate() {
-        num_words.insert(String::from(*word), (1, index as isize));
+        num_words.insert(*word, (1, index as isize));
     }
 
     for (index, word) in tens.iter().enumerate() {
-        num_words.insert(String::from(*word), (1, index as isize * 10));
+        num_words.insert(*word, (1, index as isize * 10));
     }
 
     let num: usize = 10;
 
     for (index, word) in scales.iter().enumerate() {
-        num_words.insert(String::from(*word), (num.pow(get_power(index)) as isize, 0));
+        num_words.insert(*word, (num.pow(get_power(index)) as isize, 0));
     }
 
     let mut current = 0;
@@ -112,12 +113,16 @@ fn text_to_int(text_num: &str) -> isize {
     let mut multipler = 1;
 
     for word in text_num.split_whitespace() {
-        if word.eq("negative") {
-            multipler = -1;
+        if min_distance(word, "negative") < 3 {
+            if multipler == 1 {
+                multipler = -1;
+            } else {
+                panic!("Invalid input");
+            }
         } else if !all_words.contains(&word) {
             let word = find_possible_matches(&word, &all_words);
 
-            let (scale, increment) = num_words[&word];
+            let (scale, increment) = num_words[word.as_str()];
 
             current = current * scale + increment;
             if scale > 100 {
@@ -143,20 +148,25 @@ fn find_possible_matches(word: &str, words: &[&str]) -> String {
     let mut final_string: String = String::from("");
 
     for w in words {
-        let distance = min_distance(String::from(*w), String::from(word));
+        let distance = min_distance(*w, word);
 
         if distance < min_dist {
             min_dist = distance;
             final_string = String::from(*w);
         }
     }
-    if min_dist > 3 {
+    if min_dist > 1 {
+        if min_distance(word, "negative") < 5 {
+            println!("Did you mean negative?");
+        } else {
+            println!("Did you mean {}?", final_string);
+        }
         panic!("Invalid input")
     }
     return final_string;
 }
 
-fn min_distance(word1: String, word2: String) -> i32 {
+fn min_distance(word1: &str, word2: &str) -> i32 {
     let (word1, word2) = (word1.as_bytes(), word2.as_bytes());
 
     let mut dist = Vec::with_capacity(word2.len() + 1);
