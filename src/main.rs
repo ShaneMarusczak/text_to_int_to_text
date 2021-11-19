@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-use std::io;
+use std::{collections::HashMap, io};
 
 fn main() {
     println!("Number text to integer");
@@ -56,6 +55,42 @@ fn text_to_int(text_num: &str) -> isize {
 
     num_words.insert(String::from("and"), (1, 0));
 
+    let all_words = [
+        "zero",
+        "one",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "eight",
+        "nine",
+        "ten",
+        "eleven",
+        "twelve",
+        "thirteen",
+        "fourteen",
+        "fifteen",
+        "sixteen",
+        "seventeen",
+        "eighteen",
+        "nineteen",
+        "twenty",
+        "thirty",
+        "forty",
+        "fifty",
+        "sixty",
+        "seventy",
+        "eighty",
+        "ninety",
+        "hundred",
+        "thousand",
+        "million",
+        "billion",
+        "trillion",
+    ];
+
     for (index, word) in units.iter().enumerate() {
         num_words.insert(String::from(*word), (1, index as isize));
     }
@@ -79,8 +114,16 @@ fn text_to_int(text_num: &str) -> isize {
     for word in text_num.split_whitespace() {
         if word.eq("negative") {
             multipler = -1;
-        } else if !num_words.contains_key(word) {
-            panic!("Invalid word")
+        } else if !all_words.contains(&word) {
+            let word = find_possible_matches(&word, &all_words);
+
+            let (scale, increment) = num_words[&word];
+
+            current = current * scale + increment;
+            if scale > 100 {
+                result += current;
+                current = 0;
+            }
         } else {
             let (scale, increment) = num_words[word];
 
@@ -93,4 +136,48 @@ fn text_to_int(text_num: &str) -> isize {
     }
 
     (result + current) * multipler
+}
+
+fn find_possible_matches(word: &str, words: &[&str]) -> String {
+    let mut min_dist = 9999;
+    let mut final_string: String = String::from("");
+
+    for w in words {
+        let distance = min_distance(String::from(*w), String::from(word));
+
+        if distance < min_dist {
+            min_dist = distance;
+            final_string = String::from(*w);
+        }
+    }
+    if min_dist > 3 {
+        panic!("Invalid input")
+    }
+    return final_string;
+}
+
+fn min_distance(word1: String, word2: String) -> i32 {
+    let (word1, word2) = (word1.as_bytes(), word2.as_bytes());
+
+    let mut dist = Vec::with_capacity(word2.len() + 1);
+
+    for j in 0..=word2.len() {
+        dist.push(j)
+    }
+
+    let mut prev_dist = dist.clone();
+
+    for i in 1..=word1.len() {
+        for j in 0..=word2.len() {
+            if j == 0 {
+                dist[j] += 1;
+            } else if word1[i - 1] == word2[j - 1] {
+                dist[j] = prev_dist[j - 1];
+            } else {
+                dist[j] = dist[j].min(dist[j - 1]).min(prev_dist[j - 1]) + 1;
+            }
+        }
+        prev_dist.copy_from_slice(&dist);
+    }
+    dist[word2.len()] as i32
 }
