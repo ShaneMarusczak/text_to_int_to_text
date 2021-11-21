@@ -8,7 +8,14 @@ fn main() {
         .read_line(&mut name)
         .expect("Failed to read line");
 
-    let num = text_to_int(&name);
+    // let num = text_to_int(&name);
+
+    let i: isize = match name.trim().parse() {
+        Ok(num) => num,
+        Err(_) => panic!("AHHHH"),
+    };
+
+    let num = int_to_text(i);
 
     println!("{}", num);
 }
@@ -18,6 +25,74 @@ fn get_power(num: usize) -> u32 {
         2
     } else {
         (num * 3) as u32
+    }
+}
+
+fn int_to_text(num: isize) -> String {
+    let mut num_internal = num;
+    if num_internal == 0 {
+        return String::from("zero");
+    }
+    let mut is_neg = false;
+    if num_internal < 0 {
+        num_internal = num_internal * -1;
+        is_neg = true;
+    }
+
+    let scales = ["", "thousand", "million", "billion", "trillion"];
+
+    let mut i = 0;
+    let mut words: String = String::from("");
+
+    while num_internal > 0 {
+        if num_internal % 1000 != 0 {
+            words = num_helper(num_internal % 1000) + scales[i] + " " + &words[..];
+        }
+        num_internal /= 1000;
+        i += 1;
+    }
+
+    if is_neg {
+        words = String::from("negative ") + &words[..]
+    }
+    String::from(words.trim())
+}
+
+fn num_helper(num: isize) -> String {
+    let units = [
+        "",
+        "one",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "eight",
+        "nine",
+        "ten",
+        "eleven",
+        "twelve",
+        "thirteen",
+        "fourteen",
+        "fifteen",
+        "sixteen",
+        "seventeen",
+        "eighteen",
+        "nineteen",
+    ];
+
+    let tens = [
+        "", "ten", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety",
+    ];
+    if num == 0 {
+        String::from("")
+    } else if num < 20 {
+        String::from(units[num as usize]) + " "
+    } else if num < 100 {
+        String::from(tens[(num / 10) as usize]) + " " + num_helper(num % 10).as_str()
+    } else {
+        String::from(units[(num / 100) as usize]) + " hundred " + num_helper(num % 100).as_str()
     }
 }
 
@@ -190,4 +265,44 @@ fn min_distance(word1: &str, word2: &str) -> i32 {
         prev_dist.copy_from_slice(&dist);
     }
     dist[word2.len()] as i32
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn tests_should_not_panic() {
+        assert_eq!(142, text_to_int("one hundred and forty two"));
+        assert_eq!(
+            1_427_473,
+            text_to_int(
+                "one million four hundred twenty seven thousand four hundred and seventy three"
+            )
+        );
+        assert_eq!(
+            -7396,
+            text_to_int("negative seven thousand three hundred and ninety six")
+        );
+        assert_eq!(-355, text_to_int("negativ three hundre and fifty fiv"));
+    }
+
+    #[test]
+    fn tests_should_not_panic_int() {
+        assert_eq!("one hundred forty two", int_to_text(142));
+        assert_eq!(
+            "one million four hundred twenty seven thousand four hundred seventy three",
+            int_to_text(1_427_473)
+        );
+        assert_eq!(
+            "negative seven thousand three hundred ninety six",
+            int_to_text(-7396)
+        );
+        assert_eq!("negative three hundred fifty five", int_to_text(-355));
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid input")]
+    fn tests_should_panic() {
+        assert_eq!(142, text_to_int("one hured and forty two"));
+    }
 }
