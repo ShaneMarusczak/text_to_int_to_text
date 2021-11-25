@@ -12,4 +12,4 @@ dependencies = [
 [[package]]
 name = "to_int_and_back"
 version = "0.1.0"
-source = "git+https://github.com/ShaneMarusczak/to_int_and_back#039a525cc8a0c56ba28e9e7253f25ad04e4f9dbd"
+source = "git+https://github.com/ShaneMarusczak/to_int_and_back#88d29e0890b85d7251447f1ccf9867ef80879334"
