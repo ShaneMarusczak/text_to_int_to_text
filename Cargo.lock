@@ -61,7 +61,7 @@ dependencies = [
 [[package]]
 name = "to_int_and_back"
 version = "0.1.0"
-source = "git+https://github.com/ShaneMarusczak/to_int_and_back#ab94e6e5908a5dfc534895d85726a382246ad13e"
+source = "git+https://github.com/ShaneMarusczak/to_int_and_back#07798aa36ceb360ca2501b17d5af8eb4f4432f20"
 dependencies = [
  "serde",
  "toml",
