@@ -24,7 +24,7 @@ fn to_int(old_name: &str) {
                 .read_line(&mut new_name)
                 .expect("Failed to read line");
         }
-        match to::int(&new_name.trim()) {
+        match to::float(&new_name.trim()) {
             Ok(n) => {
                 println!("{}", n);
                 break;
